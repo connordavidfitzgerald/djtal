@@ -1,0 +1,32 @@
+---
+const links = [
+    { label: 'Events', href: '/' },
+    { label: 'About', href: '/about' },
+    { label: 'Media', href: '/' },
+    { label: 'Livestream', href: '/' }
+];
+
+const { pathname } = Astro.url;
+---
+
+<div class="container grid grid-cols-12 gap-gutter">
+    <div class="col-span-1"></div>
+    <nav
+        class="hover-parent pointer-events-auto col-span-10 flex items-center justify-between text-base text-white"
+        data-nav
+    >
+        {
+            links.map((link) => (
+                <a
+                    class:list={[
+                        'nav-item hover-underline',
+                        { 'is-active': pathname === link.href && link.href !== '/' }
+                    ]}
+                    href={link.href}
+                >
+                    {link.label}
+                </a>
+            ))
+        }
+    </nav>
+</div>

@@ -1,0 +1,100 @@
+---
+import Layout from '@layouts/Layout.astro';
+
+const details = [
+    {
+        heading: 'Services',
+        items: ['Lessons', 'Equipment Rental', 'Studio Time', 'Community Events']
+    },
+    {
+        heading: 'Equipment',
+        items: [
+            '2x CDJ-3000',
+            '2x KRK Rokit 5 monitors',
+            'Pioneer A9 mixer',
+            'Pioneer XDJ-RR',
+            'ATH-M50x headphones'
+        ]
+    }
+];
+---
+
+<Layout title="About">
+    <section class="relative h-screen w-full bg-paper">
+        <!-- Intro -->
+        <div
+            class="absolute inset-x-0 top-[calc(50%-5rem)] -translate-y-full mix-blend-difference"
+        >
+            <div class="container grid grid-cols-12 gap-gutter">
+                <div class="col-span-1"></div>
+                <div class="col-span-2 text-[13px] font-medium text-white md:col-span-1">
+                    Information
+                </div>
+                <div
+                    class="col-span-8 text-[16px] leading-[115%] font-medium tracking-[-0.5%] text-white md:col-span-9 md:text-[18px]"
+                >
+                    DJTAL is an open and accessible DJ studio founded by Jean-Julien Hamouzé and
+                    Syana Barbara in Montréal, QC. Emerging from the city's tight-knit music
+                    culture, the studio was envisioned as a space where aspiring DJs and seasoned
+                    performers could share the same room. Our studio offers professional-grade
+                    equipment, soundproof walls, and everything else you need to develop your
+                    skills in a welcoming environment.
+                    <br /><br />
+                    We're committed to building a safe, inclusive space for everyone. We actively center
+                    2STLGBQ+ and BIPOC folks and maintain zero tolerance for transphobia, racism, homophobia,
+                    and all forms of violence. The studio is also fully accessible for people with mobility
+                    issues.
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta columns -->
+        <div
+            class="absolute inset-x-0 top-[calc(50%+9.375rem)] text-[13px] leading-[0.9rem] font-medium mix-blend-difference"
+        >
+            <div class="container grid grid-cols-12 gap-gutter">
+                <div class="col-span-1"></div>
+
+                {
+                    details.map((col) => (
+                        <div class="col-span-2 text-white md:col-span-2">
+                            <p class="leading-4">{col.heading}</p>
+                            <p class="text-muted">
+                                {col.items.map((item) => (
+                                    <>
+                                        {item}
+                                        <br />
+                                    </>
+                                ))}
+                            </p>
+                        </div>
+                    ))
+                }
+
+                <div class="col-span-2 hidden md:block"></div>
+
+                <div class="col-span-2 text-white md:col-span-1">
+                    <p class="leading-4">Contact</p>
+                    <p class="text-muted">
+                        General Inquiries<br />info@djt.al<br /><br />
+                        Syana Barbara<br />Founder/Director<br />syana@djt.al<br /><br />
+                        Jean-Julien Hamouzé<br />Founder/Director<br />jj@djt.al
+                    </p>
+                </div>
+
+                <div class="col-span-1 text-white">
+                    <p class="leading-4">Hours</p>
+                    <p class="text-muted">Monday to Sunday<br />9am—3am</p>
+                </div>
+
+                <div class="col-span-1 text-white">
+                    <p class="leading-4">Location</p>
+                    <p class="text-muted">
+                        633 Beaumont Ave<br />Montréal, QC H3N 1V7<br /><br />
+                        (Entrance through the back alley)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</Layout>

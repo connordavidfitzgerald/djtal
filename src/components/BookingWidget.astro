@@ -1,0 +1,245 @@
+---
+import { LENGTHS, studioNow } from '@lib/booking';
+
+const today = studioNow().date;
+---
+
+<section class="relative min-h-screen w-full bg-ink text-white">
+    <!-- Sits in the upper band so it clears the centered nav + meter overlay. -->
+    <div class="container grid min-h-screen grid-cols-12 items-start gap-gutter pt-[16vh] pb-48">
+        <div class="col-span-1"></div>
+        <div class="col-span-10" data-booking data-today={today}>
+            <div class="grid grid-cols-1 gap-10 md:grid-cols-4">
+                <!-- Date -->
+                <div>
+                    <div class="mb-3 text-[13px] text-muted">Date</div>
+                    <input
+                        type="date"
+                        data-date
+                        value={today}
+                        min={today}
+                        class="w-full border-b border-white/30 bg-transparent pb-1 text-[16px] font-medium text-white [color-scheme:dark] focus:border-white focus:outline-none"
+                    />
+                </div>
+
+                <!-- Length -->
+                <div>
+                    <div class="mb-3 text-[13px] text-muted">Length</div>
+                    <div class="flex flex-col items-start gap-1" data-lengths>
+                        {
+                            LENGTHS.map((l, i) => (
+                                <button
+                                    type="button"
+                                    data-length={l}
+                                    class:list={[
+                                        'hover-underline text-left text-[16px] font-medium transition-opacity',
+                                        i === 0 ? 'is-active opacity-100' : 'opacity-60'
+                                    ]}
+                                >
+                                    {l}h
+                                </button>
+                            ))
+                        }
+                    </div>
+                </div>
+
+                <!-- Start time -->
+                <div>
+                    <div class="mb-3 text-[13px] text-muted">Start time</div>
+                    <div
+                        class="flex max-h-[220px] flex-col items-start gap-1 overflow-y-auto pr-2"
+                        data-slots
+                    >
+                    </div>
+                    <div class="hidden text-[13px] text-muted" data-slots-empty>
+                        No times available.
+                    </div>
+                    <div class="text-[13px] text-muted" data-slots-loading>Loading…</div>
+                </div>
+
+                <!-- Total + checkout -->
+                <div>
+                    <div class="mb-3 text-[13px] text-muted">Total</div>
+                    <div class="text-heading-lg leading-none font-medium" data-total>—</div>
+                    <div class="mt-2 text-[13px] text-muted" data-summary></div>
+
+                    <button
+                        type="button"
+                        data-checkout
+                        disabled
+                        class="mt-8 inline-flex w-fit items-center justify-center bg-white px-4 py-2 text-sm font-medium text-ink transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        Checkout
+                    </button>
+                    <div class="mt-3 hidden text-[13px] text-red-400" data-error></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    interface Slot {
+        startHour: number;
+        time: string;
+        endTime: string;
+        priceCents: number;
+        price: string;
+    }
+
+    const root = document.querySelector<HTMLElement>('[data-booking]');
+    if (root) {
+        const dateInput = root.querySelector<HTMLInputElement>('[data-date]')!;
+        const lengthButtons = Array.from(
+            root.querySelectorAll<HTMLButtonElement>('[data-length]')
+        );
+        const slotsEl = root.querySelector<HTMLElement>('[data-slots]')!;
+        const slotsEmpty = root.querySelector<HTMLElement>('[data-slots-empty]')!;
+        const slotsLoading = root.querySelector<HTMLElement>('[data-slots-loading]')!;
+        const totalEl = root.querySelector<HTMLElement>('[data-total]')!;
+        const summaryEl = root.querySelector<HTMLElement>('[data-summary]')!;
+        const checkoutBtn = root.querySelector<HTMLButtonElement>('[data-checkout]')!;
+        const errorEl = root.querySelector<HTMLElement>('[data-error]')!;
+
+        const state = {
+            date: dateInput.value,
+            length: 1,
+            startHour: null as number | null,
+            slots: [] as Slot[]
+        };
+        let requestId = 0;
+
+        function showError(msg: string) {
+            errorEl.textContent = msg;
+            errorEl.classList.toggle('hidden', !msg);
+        }
+
+        function selectLength(length: number) {
+            state.length = length;
+            for (const btn of lengthButtons) {
+                const active = Number(btn.dataset.length) === length;
+                btn.classList.toggle('is-active', active);
+                btn.classList.toggle('opacity-100', active);
+                btn.classList.toggle('opacity-60', !active);
+            }
+        }
+
+        function renderTotal() {
+            const slot = state.slots.find((s) => s.startHour === state.startHour);
+            if (slot) {
+                totalEl.textContent = `${slot.price}`;
+                summaryEl.textContent = `${state.length}h · ${slot.time}–${slot.endTime} · CAD`;
+                checkoutBtn.disabled = false;
+            } else {
+                totalEl.textContent = '—';
+                summaryEl.textContent = '';
+                checkoutBtn.disabled = true;
+            }
+        }
+
+        function renderSlots() {
+            slotsEl.innerHTML = '';
+            slotsEmpty.classList.toggle('hidden', state.slots.length > 0);
+
+            for (const slot of state.slots) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.start = String(slot.startHour);
+                const selected = slot.startHour === state.startHour;
+                btn.className = [
+                    'hover-underline text-left text-[16px] font-medium transition-opacity',
+                    selected ? 'is-active opacity-100' : 'opacity-60'
+                ].join(' ');
+                btn.textContent = slot.time;
+                btn.addEventListener('click', () => {
+                    state.startHour = slot.startHour;
+                    renderSlots();
+                    renderTotal();
+                });
+                slotsEl.appendChild(btn);
+            }
+            renderTotal();
+        }
+
+        async function refresh() {
+            showError('');
+            slotsLoading.classList.remove('hidden');
+            const id = ++requestId;
+
+            try {
+                const res = await fetch(
+                    `/api/availability?date=${encodeURIComponent(state.date)}&length=${state.length}`
+                );
+                const data = await res.json();
+                if (id !== requestId) return; // a newer request superseded this one
+
+                state.slots = data.slots ?? [];
+
+                // Keep the current start if still available, else default to the first.
+                if (!state.slots.some((s) => s.startHour === state.startHour)) {
+                    state.startHour = state.slots.length ? state.slots[0].startHour : null;
+                }
+                renderSlots();
+            } catch {
+                if (id === requestId) showError('Could not load availability. Try again.');
+            } finally {
+                if (id === requestId) slotsLoading.classList.add('hidden');
+            }
+        }
+
+        for (const btn of lengthButtons) {
+            btn.addEventListener('click', () => {
+                selectLength(Number(btn.dataset.length));
+                refresh();
+            });
+        }
+
+        dateInput.addEventListener('change', () => {
+            state.date = dateInput.value;
+            refresh();
+        });
+
+        checkoutBtn.addEventListener('click', async () => {
+            if (state.startHour === null) return;
+            showError('');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Redirecting…';
+
+            try {
+                const res = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: state.date,
+                        length: state.length,
+                        startHour: state.startHour
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    window.location.href = data.url;
+                    return;
+                }
+
+                if (res.status === 409) {
+                    showError('That slot was just taken — pick another time.');
+                    await refresh();
+                } else if (res.status === 503) {
+                    showError('Payments aren’t set up yet. Please try again later.');
+                } else {
+                    showError('Something went wrong starting checkout.');
+                }
+            } catch {
+                showError('Network error — please try again.');
+            } finally {
+                checkoutBtn.textContent = 'Checkout';
+                checkoutBtn.disabled = state.startHour === null;
+            }
+        });
+
+        // Initial load (today + 1h).
+        selectLength(1);
+        refresh();
+    }
+</script>

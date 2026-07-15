@@ -1,0 +1,32 @@
+{
+    "name": "djtal",
+    "type": "module",
+    "version": "1.0.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro check && astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@astrojs/node": "^9.5.5",
+        "@libsql/client": "^0.17.4",
+        "astro": "^5.16.7",
+        "googleapis": "^173.0.0",
+        "gsap": "^3.13.0",
+        "stripe": "^22.3.1"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.5",
+        "@tailwindcss/vite": "^4.1.17",
+        "prettier": "^3.6.2",
+        "prettier-plugin-astro": "^0.14.1",
+        "prettier-plugin-tailwindcss": "^0.7.1",
+        "tailwindcss": "^4.1.17",
+        "typescript": "^5.9.3"
+    }
+}

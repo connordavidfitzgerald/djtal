@@ -1,0 +1,32 @@
+---
+import DjtalLogo from '@assets/svgs/djtal.svg';
+---
+
+<!-- Logo + tagline (inverts against whatever is behind it) -->
+<div class="pointer-events-none fixed inset-x-0 bottom-30 z-50 mix-blend-difference">
+    <div class="container grid grid-cols-12 gap-gutter">
+        <div class="col-span-1"></div>
+        <div class="col-span-1">
+            <DjtalLogo class="h-auto w-full" />
+        </div>
+        <div class="col-span-3 text-xs leading-3 tracking-wide text-white uppercase">
+            DJTAL is a cost-friendly DJ studio accessible to all.<br />Play loud, practice &amp;
+            record.
+        </div>
+    </div>
+</div>
+
+<!-- Book button (kept solid — outside the blend layer) -->
+<div class="pointer-events-none fixed inset-x-0 bottom-30 z-50">
+    <div class="container grid grid-cols-12 gap-gutter">
+        <div class="col-span-8"></div>
+        <div class="col-span-3">
+            <a
+                href="/book"
+                class="pointer-events-auto ml-auto flex w-fit items-center justify-center bg-white px-3.5 py-2 text-sm font-medium text-ink"
+            >
+                Book a session
+            </a>
+        </div>
+    </div>
+</div>

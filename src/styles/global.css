@@ -1,0 +1,119 @@
+@import 'tailwindcss';
+
+/* -------------------------------------------------------------------------- */
+/* Fonts                                                                       */
+/* -------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'Octave';
+    src: url('/fonts/Octave-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Octave';
+    src: url('/fonts/Octave-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Theme tokens                                                                */
+/* -------------------------------------------------------------------------- */
+@theme {
+    --font-sans: 'Octave', sans-serif;
+
+    --color-ink: #1f1f1f;
+    --color-paper: #f3f3f3;
+    --color-muted: #8f8f8f;
+
+    /* 12-column layout gutter */
+    --spacing-gutter: 20px;
+
+    /* Fluid type (min 320px → max 1440px viewport) */
+    --text-heading-xl: clamp(3.75rem, 2.679rem + 5.357vw, 7.5rem);
+    --text-heading-lg: clamp(3rem, 2.429rem + 2.857vw, 5rem);
+
+    --breakpoint-2xs: 340px;
+    --breakpoint-xs: 500px;
+    --breakpoint-sm: 700px;
+    --breakpoint-md: 1000px;
+    --breakpoint-lg: 1200px;
+    --breakpoint-xl: 1400px;
+
+    --transition-duration: 0.4s;
+    --ease: cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Base                                                                        */
+/* -------------------------------------------------------------------------- */
+:root {
+    --color-primary: #000000;
+    --color-secondary: #ffffff;
+}
+
+html {
+    font-family: 'Octave', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    background: var(--color-ink);
+    color: var(--color-secondary);
+}
+
+::selection {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+    text-shadow: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layout helpers                                                              */
+/* -------------------------------------------------------------------------- */
+.container {
+    width: 100%;
+    margin-inline: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Animated underline on links                                                 */
+/* -------------------------------------------------------------------------- */
+.hover-underline {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.hover-underline::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: max(1px, 0.04em);
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: 100% 0;
+    transition: transform var(--transition-duration) var(--ease);
+}
+
+.hover-underline.is-active::before {
+    transform: scaleX(1);
+    transform-origin: 0 0;
+}
+
+@media (hover: hover) {
+    .hover-parent:hover .hover-underline::before,
+    .hover-underline:hover::before {
+        transform: scaleX(1);
+        transform-origin: 0 0;
+    }
+}

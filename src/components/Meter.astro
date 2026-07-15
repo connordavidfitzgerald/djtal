@@ -1,0 +1,63 @@
+---
+// Decorative ruler / VU-meter that spans the layout grid.
+// Line count adapts to the breakpoint; a vertical line follows the cursor.
+const tiers = [
+    { count: 60, visibility: 'md:hidden' },
+    { count: 75, visibility: 'hidden md:block lg:hidden' },
+    { count: 100, visibility: 'hidden lg:block' }
+];
+---
+
+<div class="container grid grid-cols-12 gap-gutter">
+    <div class="col-span-1"></div>
+    <div id="meter" class="relative col-span-10 flex justify-between" data-meter>
+        <!-- Cursor-tracking line -->
+        <svg
+            width="1"
+            height="20"
+            class="pointer-events-none absolute z-10 opacity-0 transition-opacity duration-200"
+            style="left: 0;"
+            data-meter-cursor
+        >
+            <line x1="0" y1="0" x2="0" y2="24" stroke="white" stroke-width="2"></line>
+        </svg>
+
+        {
+            tiers.map((tier) =>
+                Array.from({ length: tier.count }).map(() => (
+                    <svg width="1" height="20" class:list={['pointer-events-none', tier.visibility]}>
+                        <line x1="0" y1="0" x2="0" y2="24" stroke="white" stroke-width="1" />
+                    </svg>
+                ))
+            )
+        }
+    </div>
+</div>
+
+<script>
+    const meter = document.querySelector<HTMLElement>('[data-meter]');
+    const cursor = document.querySelector<SVGElement>('[data-meter-cursor]');
+    const PROXIMITY = 100; // px above/below the meter that activates the line
+
+    if (meter && cursor) {
+        document.addEventListener('mousemove', (e) => {
+            const rect = meter.getBoundingClientRect();
+            const distance = Math.min(
+                Math.abs(e.clientY - rect.top),
+                Math.abs(e.clientY - rect.bottom)
+            );
+
+            if (distance < PROXIMITY) {
+                cursor.style.opacity = '1';
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                cursor.style.left = `${x}px`;
+            } else {
+                cursor.style.opacity = '0';
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            cursor.style.opacity = '0';
+        });
+    }
+</script>

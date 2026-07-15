@@ -1,0 +1,24 @@
+---
+import Layout from '@layouts/Layout.astro';
+---
+
+<Layout title="Booking confirmed">
+    <section class="relative flex min-h-screen w-full items-center bg-ink">
+        <div class="container grid grid-cols-12 gap-gutter">
+            <div class="col-span-1"></div>
+            <div class="col-span-10 text-white md:col-span-6">
+                <h1 class="text-[13px] font-medium text-muted">Booking confirmed</h1>
+                <p class="mt-4 text-[18px] leading-[115%] font-medium tracking-[-0.5%]">
+                    Payment received — your studio session is booked. A confirmation and receipt
+                    are on their way to your email. See you at 633 Beaumont Ave.
+                </p>
+                <a
+                    href="/"
+                    class="mt-8 inline-flex w-fit items-center justify-center bg-white px-3.5 py-2 text-sm font-medium text-ink"
+                >
+                    Back home
+                </a>
+            </div>
+        </div>
+    </section>
+</Layout>
