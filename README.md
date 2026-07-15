@@ -74,3 +74,4 @@ src/
 ## Deploying elsewhere
 
 The app uses the `@astrojs/node` adapter (portable, self-hostable). To deploy on Vercel/Netlify instead, swap the adapter in `astro.config.mjs` and set the same env vars in the host's dashboard.
+# djtal
