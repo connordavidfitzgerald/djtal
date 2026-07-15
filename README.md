@@ -4,7 +4,7 @@ Website + booking system for DJTAL — a cost-friendly, accessible DJ studio in 
 
 Stack:
 
-- **[Astro](https://astro.build)** (SSR via `@astrojs/node`) — pages are static; the booking API routes render on-demand
+- **[Astro](https://astro.build)** (SSR via `@astrojs/vercel`) — pages are static; the booking API routes render on-demand
 - **[Tailwind CSS v4](https://tailwindcss.com)** — styling (via `@tailwindcss/vite`)
 - **[GSAP](https://gsap.com)** — animation
 - **[Stripe](https://stripe.com)** — payments (Checkout)
@@ -71,7 +71,12 @@ src/
 └── styles/              # global.css — Tailwind theme + base styles
 ```
 
-## Deploying elsewhere
+## Deploying
 
-The app uses the `@astrojs/node` adapter (portable, self-hostable). To deploy on Vercel/Netlify instead, swap the adapter in `astro.config.mjs` and set the same env vars in the host's dashboard.
+The app uses the `@astrojs/vercel` adapter. Push to a Vercel-connected repo (or `vercel --prod`) and set the env vars in the Vercel dashboard. Two production must-dos:
+
+- **Database:** the default local SQLite file does not work on Vercel (serverless filesystems are ephemeral). Set `DATABASE_URL`/`DATABASE_AUTH_TOKEN` to a hosted libSQL/Turso instance.
+- **Stripe webhook:** point your Stripe endpoint at `https://<your-domain>/api/stripe-webhook`.
+
+To self-host instead, swap the adapter for `@astrojs/node` in `astro.config.mjs`.
 # djtal

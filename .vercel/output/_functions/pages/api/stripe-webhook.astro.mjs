@@ -1,0 +1,73 @@
+import { s as stripeEnabled, g as getStripe } from '../../chunks/stripe_DliEVPzT.mjs';
+import { r as readEnv, e as getBooking, h as createCalendarEvent, i as confirmBooking, m as markSessionExpired } from '../../chunks/calendar_BRxYh5_w.mjs';
+export { renderers } from '../../renderers.mjs';
+
+const prerender = false;
+const POST = async ({ request }) => {
+  const secret = readEnv("STRIPE_WEBHOOK_SECRET");
+  if (!stripeEnabled() || !secret) {
+    return new Response("webhook not configured", { status: 503 });
+  }
+  const signature = request.headers.get("stripe-signature");
+  if (!signature) return new Response("missing signature", { status: 400 });
+  const raw = await request.text();
+  let event;
+  try {
+    event = getStripe().webhooks.constructEvent(raw, signature, secret);
+  } catch (err) {
+    console.error("webhook signature verification failed:", err);
+    return new Response("invalid signature", { status: 400 });
+  }
+  try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const bookingId = session.metadata?.bookingId;
+      if (bookingId) {
+        const booking = await getBooking(bookingId);
+        if (booking && booking.status !== "confirmed") {
+          const name = session.customer_details?.name ?? null;
+          const email = session.customer_details?.email ?? null;
+          let googleEventId = null;
+          try {
+            googleEventId = await createCalendarEvent({
+              date: booking.date,
+              startHour: Number(booking.start_hour),
+              length: Number(booking.length),
+              priceCents: Number(booking.price_cents),
+              customerName: name,
+              email
+            });
+          } catch (calErr) {
+            console.error("calendar mirror failed:", calErr);
+          }
+          await confirmBooking(bookingId, {
+            paymentIntent: typeof session.payment_intent === "string" ? session.payment_intent : null,
+            name,
+            email,
+            googleEventId
+          });
+        }
+      }
+    } else if (event.type === "checkout.session.expired") {
+      const session = event.data.object;
+      if (session.id) await markSessionExpired(session.id);
+    }
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (err) {
+    console.error("webhook handler error:", err);
+    return new Response("handler error", { status: 500 });
+  }
+};
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+    __proto__: null,
+    POST,
+    prerender
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };
